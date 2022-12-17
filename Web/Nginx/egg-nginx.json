@@ -1,0 +1,53 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2022-12-17T21:42:16+10:00",
+    "name": "Nginx",
+    "author": "admin@example.com",
+    "description": null,
+    "features": null,
+    "docker_images": {
+        "PHP 8.0": "ghcr.io\/finnie2006\/nginx-ptero:8.0",
+        "PHP 8.1": "ghcr.io\/finnie2006\/nginx-ptero:8.1"
+    },
+    "file_denylist": [],
+    "startup": "{{STARTUP_CMD}}; if [[ ! -z ${COMPOSER_MODULES} ]]; then composer require ${COMPOSER_MODULES} --working-dir=\/home\/containe\r\nr\/webroot; fi;",
+    "config": {
+        "files": "{\r\n    \"nginx\/conf.d\/default.conf\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"    listen \": \"    listen {{server.build.default.port}};\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"\",\r\n    \"userInteraction\": []\r\n}",
+        "logs": "{\r\n    \"custom\": false,\r\n    \"location\": \"logs\/latest.log\"\r\n}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# Fix broken APT in Docker\r\necho \"nameserver 8.8.8.8\" >> \/etc\/resolv.conf\r\n#cat \/etc\/resolv.conf\r\ncd \/mnt\/server\r\necho -e \"- Going to the root folder of the server -\"\r\necho -e \"- Update container... -\"\r\napt update -y\r\napt install git -y\r\necho -e \"- Download files Nginx... -\"\r\ngit clone https:\/\/github.com\/finnie2006\/ptero-nginx .\/temp\r\n# \"Unzip\/Move\" files Nginx in root folder.\r\necho -e \"Moving Nginx files to the root folder\"\r\ncp -r .\/temp\/nginx \/mnt\/server\/\r\ncp -r .\/temp\/php-fpm \/mnt\/server\/\r\ncp -r .\/temp\/webroot \/mnt\/server\/\r\ncp .\/temp\/start.sh \/mnt\/server\/\r\necho -e \"- Changing permissions start.sh -\"\r\nchmod +x \/mnt\/server\/start.sh\r\n# Delete other trash files\r\necho -e \"- Deleting the remaining unnecessary files -\"\r\nrm -rf .\/temp\r\n# Create folders\r\necho -e \"- Creating folder: TMP and Logs -\"\r\nmkdir \/mnt\/server\/tmp\r\nmkdir \/mnt\/server\/logs\r\n# Message user\r\necho -e \"Install complete go to http:\/\/ip:port\/\"",
+            "container": "ubuntu:22.04",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Startup Command",
+            "description": "",
+            "env_variable": "STARTUP_CMD",
+            "default_value": ".\/start.sh",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "present",
+            "field_type": "text"
+        },
+        {
+            "name": "Composer modules",
+            "description": "",
+            "env_variable": "COMPOSER_MODULES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
+}
